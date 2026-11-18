@@ -19,12 +19,11 @@ Optional: `Father Name`, `Shift`, `Class-1` (11 or 12).
 ## Run locally
 Open `index.html` in a browser, or use the VS Code Live Server extension.
 
-## Publish on GitHub Pages
-Settings -> Pages -> Deploy from a branch -> `main` -> `/ (root)` -> Save.
-
 ## Privacy
 Student data and photos are stored only in the visitor's own browser
 (localStorage and IndexedDB). Do not commit Excel files or photos to this repository.
 
 ## Libraries (loaded from CDN)
 SheetJS (Excel), jsPDF (PDF), JSZip (ZIP), Google Fonts.
+
+https://muhammad-danish-abbas.github.io/Admit-card-generator/
