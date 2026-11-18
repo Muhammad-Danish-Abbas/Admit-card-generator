@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admit Card Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+<div class="app">
+  <div class="ribbon"></div>
+  <header class="top">
+    <div class="gutter">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Admit Card Generator <span class="ver" id="ver">v4 (script.js not updated)</span></h1>
+        <p id="subtitle">Upload student Excel files, add photos, download admit cards by class.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="gutter">
+    <div class="banner" id="banner" hidden>This is <b>example data</b>. Upload your own Excel file in Step 1 and it will be replaced.</div>
+    <div class="layout">
+      <aside class="setup">
+        <section class="panel">
+          <div class="step-h"><span class="num n1">1</span><h2>Student Excel files</h2></div>
+          <p class="hint">Select one or many files (.xlsx, .xls, .csv). Needed columns: Student ID, Student Name, Father Name, Class, Shift.</p>
+          <label class="drop" id="dropXl" for="xl"><strong>Click or drop Excel files here</strong><span>One file with 3000+ students works too</span><input id="xl" type="file" multiple accept=".xlsx,.xls,.csv"></label>
+          <p class="status" id="xlStatus"></p>
+        </section>
+
+        <section class="panel">
+          <div class="step-h"><span class="num n2">2</span><h2>Student photos</h2></div>
+          <p class="hint">File name must be the Student ID, like <b>2724981.png</b>. Select many photos or a whole folder.</p>
+          <label class="drop" id="dropPh" for="ph"><strong>Click or drop photos here</strong><span>.jpg, .png, .webp</span><input id="ph" type="file" multiple accept="image/*"></label>
+          <div class="row"><label class="btn small" for="phDir" style="cursor:pointer">Choose a folder</label><input id="phDir" type="file" webkitdirectory multiple style="position:absolute;opacity:0;width:1px;height:1px"><button class="btn small" id="missingBtn" type="button">Missing photo list</button></div>
+          <p class="status" id="phStatus"></p>
+        </section>
+
+        <section class="panel">
+          <details>
+            <summary><span class="step-h" style="display:inline-flex;margin:0"><span class="num n3">3</span><span style="font:700 1.05rem var(--head)">Card settings</span></span></summary>
+            <label class="field">School name<input id="set-school"></label>
+            <label class="field">Exam title<input id="set-exam"></label>
+            <div class="two">
+              <label class="field">Morning entry time<input id="set-morning"></label>
+              <label class="field">Evening entry time<input id="set-evening"></label>
+            </div>
+            <label class="field">Signature title<input id="set-title"></label>
+            <div class="two">
+              <label class="field">Morning signature (image)<input id="sigM" type="file" accept="image/*"><img class="sigprev" id="sigMp" alt="Morning signature"></label>
+              <label class="field">Evening signature (image)<input id="sigE" type="file" accept="image/*"><img class="sigprev" id="sigEp" alt="Evening signature"></label>
+            </div>
+            <label class="field">Instructions (one per line, **bold**, {time} = entry time)<textarea id="set-ins"></textarea></label>
+            <div class="row"><button class="btn small" id="resetSettings" type="button">Restore default text</button></div>
+          </details>
+        </section>
+
+        <section class="panel">
+          <div class="row" style="margin-top:0"><button class="btn small danger" id="clearAll" type="button">Clear all saved data</button></div>
+          <p class="hint" style="margin:8px 0 0">Students, settings and photos are kept in this browser only.</p>
+        </section>
+      </aside>
+
+      <section class="work">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" id="tabC" aria-selected="true" type="button">Classes</button>
+          <button class="tab" role="tab" id="tabS" aria-selected="false" type="button">Single card</button>
+        </div>
+
+        <div id="viewC" class="work">
+          <div class="stats" id="stats"></div>
+          <div class="panel navwrap">
+            <h3>Choose a class</h3>
+            <div id="nav"></div>
+            <div class="legend"><span><i class="m"></i>Morning</span><span><i class="e"></i>Evening</span></div>
+          </div>
+          <div class="tools">
+            <input type="search" id="q" placeholder="Search name or ID (all classes)" aria-label="Search students">
+            <select id="sort" aria-label="Sort"><option value="name">Sort: Name</option><option value="id">Sort: ID</option><option value="class">Sort: Class</option></select>
+          </div>
+          <div class="panel export">
+            <h3>Download admit cards <small>A5 landscape, 1 card per page</small></h3>
+            <div class="row">
+              <button class="btn primary" id="pdfClass" type="button">Download PDF</button>
+              <button class="btn" id="printShown" type="button">Print</button>
+            </div>
+            <div class="row">
+              <button class="btn" id="pdfAll" type="button">All classes in one PDF</button>
+              <button class="btn" id="zipAll" type="button">All classes as ZIP (one PDF per class)</button>
+            </div>
+            <p id="exportStatus"></p>
+            <p class="hint" style="margin:6px 0 0">Print window: choose Layout = Landscape, Paper = A5, Margins = None. The PDF download is always landscape.</p>
+          </div>
+          <div class="cards" id="grid"></div>
+          <div class="row" style="justify-content:center"><button class="btn" id="more" type="button" hidden>Show more</button></div>
+        </div>
+
+        <div id="viewS" class="single" hidden>
+          <div class="panel">
+            <h3>One student</h3>
+            <p class="hint">Type a Student ID that is already loaded to fill the form, or enter everything by hand.</p>
+            <label class="field">Student ID<input id="sc-id" inputmode="numeric"></label>
+            <label class="field">Student name<input id="sc-name"></label>
+            <label class="field">Father's name<input id="sc-father"></label>
+            <div class="two">
+              <label class="field">Class<input id="sc-class" placeholder="C1"></label>
+              <label class="field">Shift<select id="sc-shift"><option>Morning</option><option>Evening</option></select></label>
+            </div>
+            <label class="field">Photo (optional)<input id="sc-photo" type="file" accept="image/*"></label>
+            <div class="row"><button class="btn primary" id="sc-pdf" type="button">Download PDF</button><button class="btn" id="sc-print" type="button">Print this card</button></div>
+          </div>
+          <div class="panel"><div class="cw" id="sc-prev"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Admit card preview">
+  <div class="modal-in">
+    <div class="modal-bar"><div class="row" style="margin:0"><button class="btn primary" id="mPdf" type="button">Download PDF</button><button class="btn" id="mPrint" type="button">Print this card</button></div><button class="btn" id="mClose" type="button">Close</button></div>
+    <div class="modal-scroll"><div class="cw" id="mCard"></div></div>
+  </div>
+</div>
+<div class="modal" id="prog" role="dialog" aria-modal="true" aria-label="Making PDF">
+  <div class="prog-in">
+    <h3 id="progTitle">Making PDF</h3>
+    <div class="bar"><i id="progBar"></i></div>
+    <p class="hint" id="progText"></p>
+    <div class="row"><button class="btn" id="progCancel" type="button">Cancel</button></div>
+  </div>
+</div>
+<div id="printArea"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>window.XLSX||document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>')</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="script.js?v=4"></script>
+</body>
+</html>

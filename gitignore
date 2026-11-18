@@ -1,0 +1,12 @@
+# keep student data out of the repository
+*.xlsx
+*.xls
+*.csv
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.pdf
+*.zip
+.DS_Store
+node_modules/
