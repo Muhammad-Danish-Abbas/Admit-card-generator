@@ -152,3 +152,6 @@ details summary::-webkit-details-marker{display:none}
 
 .c-grid>div{min-width:0}
 .c-grid>div:nth-child(odd){padding-right:1.6cqw}
+
+.check{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:.84rem;color:var(--muted);cursor:pointer}
+.check input{margin-top:3px}
