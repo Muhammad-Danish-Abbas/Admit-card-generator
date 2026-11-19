@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div class="app">
@@ -16,20 +16,21 @@
     <div class="gutter">
       <div class="logo" aria-hidden="true"></div>
       <div>
-        <h1>Admit Card Generator <span class="ver" id="ver">v4 (script.js not updated)</span></h1>
+        <h1>Admit Card Generator <span class="ver" id="ver">v5 (script.js not updated)</span></h1>
         <p id="subtitle">Upload student Excel files, add photos, download admit cards by class.</p>
       </div>
     </div>
   </header>
 
   <main class="gutter">
-    <div class="banner" id="banner" hidden>This is <b>example data</b>. Upload your own Excel file in Step 1 and it will be replaced.</div>
+    <div class="banner" id="banner" hidden><b>Start here:</b> upload your student Excel file in Step 1, then the photos in Step 2.</div>
     <div class="layout">
       <aside class="setup">
         <section class="panel">
           <div class="step-h"><span class="num n1">1</span><h2>Student Excel files</h2></div>
           <p class="hint">Select one or many files (.xlsx, .xls, .csv). Needed columns: Student ID, Student Name, Father Name, Class, Shift.</p>
           <label class="drop" id="dropXl" for="xl"><strong>Click or drop Excel files here</strong><span>One file with 3000+ students works too</span><input id="xl" type="file" multiple accept=".xlsx,.xls,.csv"></label>
+          <label class="check"><input type="checkbox" id="keepOld"> Add to students already loaded (unticked: new upload replaces them)</label>
           <p class="status" id="xlStatus"></p>
         </section>
 
@@ -141,6 +142,6 @@
 <script>window.XLSX||document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>')</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="script.js?v=4"></script>
+<script src="script.js?v=5"></script>
 </body>
 </html>
