@@ -17,16 +17,7 @@ var settings=Object.assign({},DEFAULTS,LS.get('acg.settings',{}));
 function saveSettings(){LS.set('acg.settings',settings)}
 
 /* ---------- data ---------- */
-var SAMPLE=[
- {id:'2724981',name:'ABDUL WASAY',father:'ASIF NIZAM',cls:'C1',grade:'11',shift:'Morning'},
- {id:'2725063',name:'AHMED SHAHZAIB',father:'SHAHZAIB',cls:'C1',grade:'11',shift:'Morning'},
- {id:'2723101',name:'HASSAN RAZA',father:'RAZA ALI',cls:'M1',grade:'11',shift:'Morning'},
- {id:'2724009',name:'AABAN PASHA SHAIKH',father:'SHAHID PASHA SHAIKH',cls:'EE6B',grade:'12',shift:'Evening'},
- {id:'2724010',name:'SARA KHAN',father:'IMRAN KHAN',cls:'EE6B',grade:'12',shift:'Evening'},
- {id:'2723544',name:'ZARA SHEIKH',father:'FAISAL SHEIKH',cls:'E2',grade:'11',shift:'Evening'}
-];
-var students=LS.get('acg.students',null), isSample=false;
-if(!students||!students.length){students=SAMPLE.slice();isSample=true}
+var students=LS.get('acg.students',[])||[];
 var photos=new Map();
 var state={cls:'',q:'',sort:'name',shown:60,tab:'C',modalStudent:null};
 
@@ -93,13 +84,13 @@ async function handleExcel(files){
   var r=await readExcel(files);
   if(!r.rows.length){st.className='status err';st.textContent=(r.notes.join(' | ')||'No students found.');return}
   var map=new Map();
-  if(!isSample)students.forEach(function(s){map.set(s.id,s)});
+  if($('#keepOld').checked)students.forEach(function(s){map.set(s.id,s)});
   r.rows.forEach(function(s){map.set(s.id,s)});
-  students=Array.from(map.values());isSample=false;
+  students=Array.from(map.values());
   LS.set('acg.students',students);
   state.cls='';
   st.className='status ok';
-  st.textContent=r.rows.length+' students loaded from '+r.used+' file(s). Total: '+students.length+'.'+(r.notes.length?' Skipped: '+r.notes.join(' | '):'');
+  st.textContent=r.rows.length+' students loaded from '+r.used+' file(s). Now showing '+students.length+' students.'+(r.notes.length?' Skipped: '+r.notes.join(' | '):'');
   render();
 }
 
@@ -386,7 +377,8 @@ function renderGrid(){
   $('#pdfClass').textContent='Download PDF: '+what+' ('+l.length+')';
   $('#printShown').textContent='Print '+what;
   $('#pdfClass').disabled=$('#printShown').disabled=!l.length;
-  if(!l.length){$('#grid').innerHTML='<div class="empty">'+(q?'No students found.':'No students in this class yet. Upload its Excel file in Step 1.')+'</div>';$('#more').hidden=true;return}
+  $('#pdfAll').disabled=$('#zipAll').disabled=!students.length;
+  if(!l.length){$('#grid').innerHTML='<div class="empty">'+(!students.length?'No student data yet. Upload an Excel file in Step 1 to begin.':q?'No students found.':'No students in this class yet. Upload its Excel file in Step 1.')+'</div>';$('#more').hidden=true;return}
   var part=l.slice(0,state.shown);
   $('#grid').innerHTML=part.map(function(s){
     return '<article class="item"><div class="cw" data-open="'+esc(s.id)+'" title="Click to enlarge">'+cardHTML(s)+'</div>'+
@@ -397,7 +389,7 @@ function renderGrid(){
   $('#more').textContent='Show more ('+(l.length-state.shown)+' left)';
 }
 function render(){
-  $('#banner').hidden=!isSample;
+  $('#banner').hidden=students.length>0;
   $('#subtitle').textContent=settings.school;
   renderStats();renderNav();renderGrid();renderSingle();
 }
@@ -507,13 +499,13 @@ $('#clearAll').addEventListener('click',async function(){
   window.__confirmClear=false;this.textContent='Clear all saved data';
   LS.del('acg.students');LS.del('acg.settings');await dbClear();
   photos.forEach(function(u){URL.revokeObjectURL(u)});photos.clear();
-  settings=Object.assign({},DEFAULTS);students=SAMPLE.slice();isSample=true;state.cls='';
+  settings=Object.assign({},DEFAULTS);students=[];state.cls='';
   $('#xlStatus').textContent='';$('#phStatus').textContent='';
   fillSettings();render();
 });
 
 /* ---------- start ---------- */
-$('#ver').textContent='v4 ready';
+$('#ver').textContent='v5 ready';
 fillSettings();render();
 dbLoad().then(function(){if(photos.size){$('#phStatus').className='status ok';$('#phStatus').textContent=photos.size+' saved photos loaded.';render()}});
 window.__acg={readExcel:readExcel,cardHTML:cardHTML,normShift:normShift};
